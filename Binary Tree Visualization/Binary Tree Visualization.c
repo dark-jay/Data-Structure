@@ -48,13 +48,10 @@ int main()
     printf("\n\nLevels are :\n");
     printLevelOrder(bst);
 
-    //displayTree(bst);
+    displayTree(bst);
     printf("\n");
-    int arrLevel[100];
-    getGivenLevel(bst, 3, arrLevel);
-    for(x; x<nodeCount; x++){
-        printf("%d ", arrLevel[x]);
-    }
+
+    //displayTree(bst);
 
     printf("\n\nEND\n");
 
@@ -124,43 +121,78 @@ void getPreorderTravValue(Btree root, int preOrderArr[]){
     }
 }
 /*
-                                   SS      DBSS(util)     Q       DBC
-              i    n    Lvl    Starting    Difference   Quotes  Difference
-                   or          Space(SS)   Between SS   SS+2    Between 2 child
-                   h           DBSS(n-1)   DBSS(n-1)*2          SS(n+1)+1
-                               *2+SS(n-1)
-            """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-              0    1     5   |   0          0            4       3
-              1    2     4   |   4          4            6       11
-              2    3     3   |   10         6            12      23
-              3    4     2   |   22         12           24      47
-              4    5     1   |   46         24           48      95
-              5    6     0   |   94         48           96      191
+         5
+    """""" """"""
+    |           |
+    2           9
+"""" """"   """" """"
+|           |
+1           7
+
 */
 void displayTree(Btree root){
+    int arrLevel[100];
     int h = height(root);
     int level = h-1;
-    int arr_N[h], arr_SS[h], arr_DBSS[h], arr_Q[h], arr_DBC[h];
-    populateArray(arr_N, arr_SS, arr_DBSS, arr_Q, arr_DBC, h);
-    printArray(arr_N, arr_SS, arr_DBSS, arr_Q, arr_DBC, h);
+    //int const_h = h+1; // we gonna need one extra level info for calculation
+    int arr_N[h], arr_SS[h], arr_DBSS[h], arr_Q[h], arr_DBCE[h];
+    populateArray(arr_N, arr_SS, arr_DBSS, arr_Q, arr_DBCE, h);
+    printArray(arr_N, arr_SS, arr_DBSS, arr_Q, arr_DBCE, h);
 
     printf("\n\n");
 
     int ss=0;
-    int i, j, k, l;
+    int i, j, k, l, x, n, tempNodeCount, flag7or3 = 3;
     // traverse through total number of level
     for(l=0; l<h; l++){
+        n = l+1;
         // number
-        int spaceBeforeNode = arr_SS[h-l-1] + arr_Q[h-l-1];
-        while(spaceBeforeNode >= 0){
-            printf("j");
+        int spaceBeforeNode = arr_SS[h-1-l]; // h-1-l because list is upside down //arr_SS[h-l-1] + arr_Q[h-l-1];
+        //printf("\n## %d ##\n", spaceBeforeNode); delete this line later
+        while(spaceBeforeNode > 0){
+            printf(" ");
             spaceBeforeNode--;
         }
-        int c, limit=pow(2,l);
-        //for(c=1; c<=limit; c++){
+        //int c, limit=pow(2,l);
+        //for(c=1; c<=limit; c++)
             //printf("%d", );
-            printGivenLevel(root, l+1); // since in the function level 0 = level 1
-        //}
+        getGivenLevel(root, l+1, arrLevel); // level counting starts from zero
+        tempNodeCount=nodeCount;
+        // add spaces between childs
+        ss = arr_DBCE[h-1-l];
+        // traverse every node on a single level
+        for(x=0; x<nodeCount; x++){
+            if(arrLevel[x] != -99)
+                printf("%d", arrLevel[x]);
+            else
+                printf(" ");
+            //printf(" SS=%d ", ss); // delete this line when done
+            // if last level
+            if(l == h-1){
+                if(flag7or3 == 3){ // or flag7or3 == ss
+                    int c=7;
+                    while(c){
+                        printf(" ");
+                        c--;
+                    }
+                    flag7or3 = 7;
+                }
+                else{
+                    int c=3;
+                    while(c){
+                        printf(" ");
+                        c--;
+                    }
+                    flag7or3 = 3;
+                }
+            }
+            else{
+                while(ss){
+                    printf(" ");
+                    ss--;
+                }
+            }
+        }
 
         // quotes
 
@@ -168,39 +200,55 @@ void displayTree(Btree root){
 
         // new level
         printf("\n");
+        nodeCount = 0;
     }
 }
-
-void printArray(int arr_N[], int arr_SS[], int arr_DBSS[], int arr_Q[], int arr_DBC[], int h){
+/*
+11
+7 3 7 3 7
+                            SS      DBSS(util)     Q       DBCE         DBC
+        i    n    Lvl    Starting    Difference   Quotes  Difference    Difference
+             or          Space(SS)   Between SS   SS+2    Between 2     between 2
+             h           DBSS(n-1)   DBSS(n-1)*2          child/edges   child
+                         *2+SS(n-1)                       SS(n+1)+1     Q(n)*2 - 1
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+        0    1     5   |   0          0            4       3            7 or 3 alternatively
+        1    2     4   |   4          4            6       11           11
+        2    3     3   |   10         6            12      23           23
+        3    4     2   |   22         12           24      47           47
+        4    5     1   |   46         24           48      95           95
+        5    6     0   |   94         48           96      191
+*/
+void printArray(int arr_N[], int arr_SS[], int arr_DBSS[], int arr_Q[], int arr_DBCE[], int h){
     int i;
     printf("\nh\tlvl\tSS\tDBSS\tQ\tDBC");
     printf("\n\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"");
     for(i=0; i<h; i++){
-        printf("\n%d\t%d\t%d\t%d\t%d\t%d", arr_N[i], h-i-1, arr_SS[i], arr_DBSS[i], arr_Q[i], arr_DBC[i]);
+        printf("\n%d\t%d\t%d\t%d\t%d\t%d", arr_N[i], h-i-1, arr_SS[i], arr_DBSS[i], arr_Q[i], arr_DBCE[i]);
     }
 }
 
-void populateArray(int arr_N[], int arr_SS[], int arr_DBSS[], int arr_Q[], int arr_DBC[], int h){
+void populateArray(int arr_N[], int arr_SS[], int arr_DBSS[], int arr_Q[], int arr_DBCE[], int h){
     int i=0;
     if(h==1){
         arr_N[i] = 1;
         arr_SS[i] = 0;
         arr_DBSS[i] = 0;
         arr_Q[i] = 4;
-        arr_DBC[i] = 3;
+        arr_DBCE[i] = 3;
     }
     else if(h==2){
         arr_N[i+1] = 2;
         arr_SS[i+1] = 4;
         arr_DBSS[i+1] = 4;
         arr_Q[i+1] = 6;
-        arr_DBC[i+1] = 11;
+        arr_DBCE[i+1] = 11;
 
         arr_N[i] = 1;
         arr_SS[i] = 0;
         arr_DBSS[i] = 0;
         arr_Q[i] = 4;
-        arr_DBC[i] = 3;
+        arr_DBCE[i] = 3;
     }
     else if(h == 3){
         // i = 2
@@ -208,21 +256,21 @@ void populateArray(int arr_N[], int arr_SS[], int arr_DBSS[], int arr_Q[], int a
         arr_SS[i+2] = 10;
         arr_DBSS[i+2] = 6;
         arr_Q[i+2] = 12;
-        arr_DBC[i+2] = 23;
+        arr_DBCE[i+2] = 23;
 
         // i = 1
         arr_N[i+1] = 2;
         arr_SS[i+1] = 4;
         arr_DBSS[i+1] = 4;
         arr_Q[i+1] = 6;
-        arr_DBC[i+1] = 11;
+        arr_DBCE[i+1] = 11;
 
         // i = 0
         arr_N[i] = 1;
         arr_SS[i] = 0;
         arr_DBSS[i] = 0;
         arr_Q[i] = 4;
-        arr_DBC[i] = 3;
+        arr_DBCE[i] = 3;
     }
     else if(h > 3){
         // i = 2
@@ -230,21 +278,21 @@ void populateArray(int arr_N[], int arr_SS[], int arr_DBSS[], int arr_Q[], int a
         arr_SS[i+1] = 10;
         arr_DBSS[i+1] = 6;
         arr_Q[i+1] = 12;
-        arr_DBC[i+1] = 23;
+        arr_DBCE[i+1] = 23;
 
         // i = 1
         arr_N[i+1] = 2;
         arr_SS[i+1] = 4;
         arr_DBSS[i+1] = 4;
         arr_Q[i+1] = 6;
-        arr_DBC[i+1] = 11;
+        arr_DBCE[i+1] = 11;
 
         // i = 0
         arr_N[i] = 1;
         arr_SS[i] = 0;
         arr_DBSS[i] = 0;
         arr_Q[i] = 4;
-        arr_DBC[i] = 3;
+        arr_DBCE[i] = 3;
 
         // i > 2
         for(i=3; i<h; i++){ // note: i = h-1 or n-1
@@ -254,7 +302,7 @@ void populateArray(int arr_N[], int arr_SS[], int arr_DBSS[], int arr_Q[], int a
             arr_DBSS[i] = arr_DBSS[i-1]*2;
             arr_Q[i] = arr_SS[i] + 2;
             temp_arr_SS = arr_DBSS[i]*2 + arr_SS[i]; // arr_ss[i+1]
-            arr_DBC[i] = temp_arr_SS + 1;
+            arr_DBCE[i] = temp_arr_SS + 1;
         }
     }
 }
@@ -317,7 +365,7 @@ void getGivenLevel(Btree root, int level, int arrLevel[])
     int tempLevel;
 
     if (root == NULL){ // Base Case
-        arrLevel[nodeCount++] = 0;
+        arrLevel[nodeCount++] = -99;
         return;
     }
     if (level == 1) {
@@ -480,7 +528,6 @@ int height(Btree node)
 // gap between 2 child = 3 at last level
 
 // Space =
-
 
 
 
