@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <string.h>
 
 int TRUE=1, FALSE=0, i = 0, nodeCount=0;
 
@@ -47,6 +46,8 @@ int main()
 
     printf("\n\nLevels are :\n");
     printLevelOrder(bst);
+
+    printf("\n\n");
 
     displayTree(bst);
     printf("\n");
@@ -131,7 +132,7 @@ void getPreorderTravValue(Btree root, int preOrderArr[]){
 
 */
 void displayTree(Btree root){
-    int arrLevel[100];
+    int arrLevel[100], arrLevel_Temp[100]; // temp array is use to check if the node is NULL or not in advance before heading to the next level NUMBER
     int h = height(root);
     int level = h-1;
     //int const_h = h+1; // we gonna need one extra level info for calculation
@@ -142,31 +143,31 @@ void displayTree(Btree root){
     printf("\n\n");
 
     int ss=0;
-    int i, j, k, l, x, n, tempNodeCount, flag7or3 = 3;
+    int i, j, k, l, x, n, flag7or3 = 3, tempNodeCount;
+
     // traverse through total number of level
     for(l=0; l<h; l++){
         n = l+1;
-        // number
+
+        // NUMBER
         int spaceBeforeNode = arr_SS[h-1-l]; // h-1-l because list is upside down //arr_SS[h-l-1] + arr_Q[h-l-1];
-        //printf("\n## %d ##\n", spaceBeforeNode); delete this line later
         while(spaceBeforeNode > 0){
             printf(" ");
             spaceBeforeNode--;
         }
-        //int c, limit=pow(2,l);
-        //for(c=1; c<=limit; c++)
-            //printf("%d", );
+
         getGivenLevel(root, l+1, arrLevel); // level counting starts from zero
-        tempNodeCount=nodeCount;
+        tempNodeCount = nodeCount;
         // add spaces between childs
         ss = arr_DBCE[h-1-l];
-        // traverse every node on a single level
-        for(x=0; x<nodeCount; x++){
-            if(arrLevel[x] != -99)
+        // traverse every node on a single level and print
+        for(x=0; x<tempNodeCount; x++){
+            if(arrLevel[x] != -99) // -99 if node is not NULL
                 printf("%d", arrLevel[x]);
             else
                 printf(" ");
-            //printf(" SS=%d ", ss); // delete this line when done
+
+            // this portion is to handle last level quotes since it varies between 7 and 3
             // if last level
             if(l == h-1){
                 if(flag7or3 == 3){ // or flag7or3 == ss
@@ -186,6 +187,7 @@ void displayTree(Btree root){
                     flag7or3 = 3;
                 }
             }
+            // if not last level
             else{
                 while(ss){
                     printf(" ");
@@ -194,9 +196,109 @@ void displayTree(Btree root){
             }
         }
 
-        // quotes
 
-        // pipes
+        // QUOTES
+        printf("\n");
+        // if last level
+        int spaceBeforeQuotes;
+        if(l == h-1)
+            spaceBeforeQuotes = 0;
+        else
+            spaceBeforeQuotes = arr_SS[h-1-l-1]; // h-1-l-1 because we need one level below
+        //printf(" j %d ", spaceBeforeQuotes); // delete when done
+        while(spaceBeforeQuotes > 0){
+            printf(" ");
+            spaceBeforeQuotes--;
+        }
+        // if not at the last level, only then print quotes are edges
+        if(l != h-1){
+            int quoteTracker = 0;
+            int spaceBetQuotes = 0;
+            for(x=0; x<tempNodeCount; x++){
+                while(quoteTracker < arr_Q[h-1-l-1]){
+                    printf("\"");
+                    quoteTracker++;
+                }
+                printf(" ");
+                quoteTracker = 0;
+                while(quoteTracker < arr_Q[h-1-l-1]){
+                    printf("\"");
+                    quoteTracker++;
+                }
+                // space between 2 child edges
+                while(spaceBetQuotes < arr_DBCE[h-1-l-1]){
+                    printf(" ");
+                    spaceBetQuotes++;
+                }
+                quoteTracker = 0;
+                spaceBetQuotes = 0;
+            }
+        }
+
+
+        // PIPES
+        // traverse every node on a single level to print |
+        printf("\n");
+        // if last level
+        if(l == h-1)
+            spaceBeforeQuotes = 0;
+        else
+            spaceBeforeQuotes = arr_SS[h-1-l-1]; // h-1-l-1 because we need one level below
+        //printf(" j %d ", spaceBeforeQuotes); // delete when done
+        while(spaceBeforeQuotes > 0){
+            printf(" ");
+            spaceBeforeQuotes--;
+        }
+        // if not at the last level, only then print pipes
+        if(l != h-1){
+            // this will modify the actual nodeCount for now in advance for next level
+            nodeCount = 0;
+            getGivenLevel(root, l+2, arrLevel_Temp); // get the next level node in advance
+            int quoteTracker = 0;
+            int spaceBetQuotes = 0;
+            int flagFirstPipe = 1; // 0 means false, dont print
+            int childCounterForNxtLvl=0, z;
+            // traverse through every node on that level
+            for(x=0; x<tempNodeCount; x++){
+                // distacne of first part of quotes
+                while(quoteTracker < arr_Q[h-1-l-1]){
+                    if(flagFirstPipe == 1){
+                        if(arrLevel_Temp[childCounterForNxtLvl++] != -99) // if node is not NULL
+                            printf("|");
+                        else
+                            printf(" ");
+
+                        flagFirstPipe = 0;
+                    }
+                    else
+                        printf(" ");
+                    quoteTracker++;
+                }
+                // distacne of single gap between quotes pairs
+                printf(" ");
+                quoteTracker = 0;
+                // distacne of second part of quotes
+                while(quoteTracker < arr_Q[h-1-l-1]-1){
+                    printf(" ");
+                    quoteTracker++;
+                }
+
+                if(arrLevel_Temp[childCounterForNxtLvl++] != -99) // -99 if node is not NULL
+                    printf("|");
+                else
+                    printf(" ");
+
+                // space between 2 child edges or quotes
+                while(spaceBetQuotes < arr_DBCE[h-1-l-1]){
+                    printf(" ");
+                    spaceBetQuotes++;
+                }
+                quoteTracker = 0;
+                spaceBetQuotes = 0;
+                flagFirstPipe = 1;
+            }
+        }
+
 
         // new level
         printf("\n");
@@ -424,7 +526,6 @@ int height(Btree node)
 
 
 
-
 //5 2 1 9 7
 /*
 5               // l=0, S=0
@@ -585,7 +686,7 @@ int height(Btree node)
 
 
 
-                                   SS      DBSS(util)     Q       DBC
+                                   SS      DBSS(util)     Q       DBCE
                    n    Lvl    Starting    Difference   Quotes  Difference
                                Space(SS)   Between SS   SS+2    Between 2 child
                                DBSS(n-1)   DBSS(n-1)*2          SS(n+1)+1
