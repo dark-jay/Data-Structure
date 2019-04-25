@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <conio.h>
 
 int TRUE=1, FALSE=0, i = 0, nodeCount=0, mainLevel=0;
 
@@ -46,10 +47,9 @@ int main()
     preorderTrav(bst);
     printf("\nPostorder: ");
     postorderTrav(bst);
-    printf("\n\nDisplay: ");
     //displayTree(bst);
 
-    printf("\n\nLevels are :\n");
+    printf("\nLevels are :\n");
     printLevelOrder(bst);
 
     printf("\n\n");
@@ -57,15 +57,9 @@ int main()
     displayTree(bst);
     printf("\n");
 
-    int arr[50], z;
-    getGivenLevelinAdvance(bst, 4, arr);
-    printf("\n");
-    for(z=0; z<8; z++){
-        printf("%d ", arr[z]);
-    }
-
     printf("\n\nEND\n");
 
+    getch();
     return 0;
 }
 
@@ -223,17 +217,38 @@ void displayTree(Btree root){
         }
         // if not at the last level, only then print quotes are edges
         if(l != h-1){
+            // this will modify the actual nodeCount for now in advance for next level
+            nodeCount = 0;
+            getGivenLevelinAdvance(root, l+2, arrLevel_Temp); // get the next level node in advance
             int quoteTracker = 0;
             int spaceBetQuotes = 0;
+            int flagForQuotes = 1; // 0 means false, dont print quotes
+            int childCounterForNxtLvl=0;
+
+            // traverse through every node on curr level
             for(x=0; x<tempNodeCount; x++){
+                // first part of quotes
                 while(quoteTracker < arr_Q[h-1-l-1]){
-                    printf("\"");
+                    if(flagForQuotes == 1){ // only runs once
+                        if(arrLevel_Temp[childCounterForNxtLvl+1] == -99 && arrLevel_Temp[childCounterForNxtLvl+2] == -99) // if next level respective down below node is NULL
+                            flagForQuotes = 0;
+                    }
+                    // if flagForQuotes=0, dont print
+                    if(flagForQuotes == 0)
+                        printf(" ");
+                    else
+                        printf("\"");
                     quoteTracker++;
                 }
+                // single gap between quotes pairs
                 printf(" ");
                 quoteTracker = 0;
+                // second part of quotes
                 while(quoteTracker < arr_Q[h-1-l-1]){
-                    printf("\"");
+                    if(flagForQuotes == 0)
+                        printf(" ");
+                    else
+                        printf("\"");
                     quoteTracker++;
                 }
                 // space between 2 child edges
@@ -243,6 +258,8 @@ void displayTree(Btree root){
                 }
                 quoteTracker = 0;
                 spaceBetQuotes = 0;
+                childCounterForNxtLvl+=2;
+                flagForQuotes = 1;
             }
         }
 
@@ -264,7 +281,6 @@ void displayTree(Btree root){
         if(l != h-1){
             // this will modify the actual nodeCount for now in advance for next level
             nodeCount = 0;
-            //mainLevel = l+2;
             getGivenLevelinAdvance(root, l+2, arrLevel_Temp); // get the next level node in advance
             //fixNodeCount(l, arrLevel_Temp);
             int quoteTracker = 0;
@@ -276,8 +292,8 @@ void displayTree(Btree root){
             for(x=0; x<tempNodeCount; x++){
                 // distacne of first part of quotes
                 while(quoteTracker < arr_Q[h-1-l-1]){
-                    if(flagFirstPipe == 1){ // only runs onces
-                        if(arrLevel_Temp[childCounterForNxtLvl++] != -99) // if node is not NULL
+                    if(flagFirstPipe == 1){ // only runs once
+                        if(arrLevel_Temp[childCounterForNxtLvl++] != -99) // if next level respective down below node is not NULL
                             printf("|");
                         else
                             printf(" ");
