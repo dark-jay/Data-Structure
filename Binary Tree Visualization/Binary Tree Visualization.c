@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-int TRUE=1, FALSE=0, i = 0, nodeCount=0;
+int TRUE=1, FALSE=0, i = 0, nodeCount=0, mainLevel=0;
 
 typedef struct node {
     struct node *left;
@@ -34,6 +34,11 @@ int main()
     addTree(bst, 2);
     addTree(bst, 1);
     addTree(bst, 7);
+    addTree(bst, 6);
+    addTree(bst, 3);
+    addTree(bst, 9);
+    addTree(bst, 4);
+    addTree(bst, 8);
 
     printf("Inorder: ");
     inorderTrav(bst);
@@ -52,7 +57,12 @@ int main()
     displayTree(bst);
     printf("\n");
 
-    //displayTree(bst);
+    int arr[50], z;
+    getGivenLevelinAdvance(bst, 4, arr);
+    printf("\n");
+    for(z=0; z<8; z++){
+        printf("%d ", arr[z]);
+    }
 
     printf("\n\nEND\n");
 
@@ -143,7 +153,7 @@ void displayTree(Btree root){
     printf("\n\n");
 
     int ss=0;
-    int i, j, k, l, x, n, flag7or3 = 3, tempNodeCount;
+    int i, j, k, l, x, n, flag7or3 = 3, tempNodeCount, space;
 
     // traverse through total number of level
     for(l=0; l<h; l++){
@@ -162,6 +172,7 @@ void displayTree(Btree root){
         ss = arr_DBCE[h-1-l];
         // traverse every node on a single level and print
         for(x=0; x<tempNodeCount; x++){
+            space = ss;
             if(arrLevel[x] != -99) // -99 if node is not NULL
                 printf("%d", arrLevel[x]);
             else
@@ -189,9 +200,9 @@ void displayTree(Btree root){
             }
             // if not last level
             else{
-                while(ss){
+                while(space){
                     printf(" ");
-                    ss--;
+                    space--;
                 }
             }
         }
@@ -244,7 +255,7 @@ void displayTree(Btree root){
             spaceBeforeQuotes = 0;
         else
             spaceBeforeQuotes = arr_SS[h-1-l-1]; // h-1-l-1 because we need one level below
-        //printf(" j %d ", spaceBeforeQuotes); // delete when done
+
         while(spaceBeforeQuotes > 0){
             printf(" ");
             spaceBeforeQuotes--;
@@ -253,16 +264,19 @@ void displayTree(Btree root){
         if(l != h-1){
             // this will modify the actual nodeCount for now in advance for next level
             nodeCount = 0;
-            getGivenLevel(root, l+2, arrLevel_Temp); // get the next level node in advance
+            //mainLevel = l+2;
+            getGivenLevelinAdvance(root, l+2, arrLevel_Temp); // get the next level node in advance
+            //fixNodeCount(l, arrLevel_Temp);
             int quoteTracker = 0;
             int spaceBetQuotes = 0;
             int flagFirstPipe = 1; // 0 means false, dont print
-            int childCounterForNxtLvl=0, z;
-            // traverse through every node on that level
+            int childCounterForNxtLvl=0;
+
+            // traverse through every node on curr level
             for(x=0; x<tempNodeCount; x++){
                 // distacne of first part of quotes
                 while(quoteTracker < arr_Q[h-1-l-1]){
-                    if(flagFirstPipe == 1){
+                    if(flagFirstPipe == 1){ // only runs onces
                         if(arrLevel_Temp[childCounterForNxtLvl++] != -99) // if node is not NULL
                             printf("|");
                         else
@@ -376,11 +390,11 @@ void populateArray(int arr_N[], int arr_SS[], int arr_DBSS[], int arr_Q[], int a
     }
     else if(h > 3){
         // i = 2
-        arr_N[i+1] = 3;
-        arr_SS[i+1] = 10;
-        arr_DBSS[i+1] = 6;
-        arr_Q[i+1] = 12;
-        arr_DBCE[i+1] = 23;
+        arr_N[i+2] = 3;
+        arr_SS[i+2] = 10;
+        arr_DBSS[i+2] = 6;
+        arr_Q[i+2] = 12;
+        arr_DBCE[i+2] = 23;
 
         // i = 1
         arr_N[i+1] = 2;
@@ -481,6 +495,49 @@ void getGivenLevel(Btree root, int level, int arrLevel[])
     }
 }
 
+void getGivenLevelinAdvance(Btree root, int level, int arrLevel[])
+{
+    //int arrLevel[10], nodeCount=0;
+    int tempLevel;
+
+    if (root == NULL){ // Base Case
+        if(level == 1){ // means we are at the very last level below which no level
+            arrLevel[nodeCount++] = -99;
+        }
+        else{ // means we are above the desired level where the node is NULL
+            int levelDifference = level - 1;
+            int allPossibleNodes = pow(2, levelDifference);
+            // fill all possible NUll nodes with -99
+            while(allPossibleNodes){
+                arrLevel[nodeCount++] = -99;
+                arrLevel[nodeCount++] = -99;
+                allPossibleNodes--;
+            }
+        }
+        return;
+    }
+    if (level == 1) {
+        //printf("%d ", root->data);
+        arrLevel[nodeCount++] = root->data;
+    }
+    else if (level > 1)
+    {
+        getGivenLevelinAdvance(root->left, level-1, arrLevel);
+        getGivenLevelinAdvance(root->right, level-1, arrLevel);
+    }
+}
+/*
+                                         5
+                            """"""""""""" """"""""""""""
+                            |                           |
+                            2                           9
+                     """"""" """""""             """"""" """""""
+                     |             |             |
+                     1             3             7
+                 """" """"     """" """"     """" """"     """" """"
+                                       |     |       |             |
+                                       4     6       8
+*/
 /*
           5
     """""" """"""
@@ -508,6 +565,18 @@ int height(Btree node)
         if (lheight > rheight)
             return(lheight + 1);
         else return(rheight + 1);
+    }
+}
+
+void fixNodeCount(int level, int arrLevel[]){
+    int totalNodes = nodeCount;
+    int maxNodesOfCurrLvl = pow(2, level);
+    if(maxNodesOfCurrLvl != totalNodes){
+        int diff = maxNodesOfCurrLvl - totalNodes;
+        while(diff){
+            arrLevel[nodeCount++] = -99;
+            diff--;
+        }
     }
 }
 
